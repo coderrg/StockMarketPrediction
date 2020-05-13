@@ -9,6 +9,7 @@ import time
 
 BROKER_URL = "PLAINTEXT://localhost:9092"
 TOPIC_NAME = "my-first-python-topic"
+STOCK = 'MSFT'
 
 api_key = 'B0N8Q38MJAVBSLOY'
 
@@ -18,6 +19,9 @@ async def produce(topic_name):
     #       See: https://docs.confluent.io/current/clients/confluent-kafka-python/#producer
     p = Producer({"bootstrap.servers": BROKER_URL})
 
+    ts = TimeSeries(key=api_key, output_format='pandas')
+    data, meta_data = ts.get_intraday(symbol='MSFT', interval = '1min', outputsize = 'full')
+    
     curr_iteration = 0
     while True:
         # TODO: Produce a message to the topic
