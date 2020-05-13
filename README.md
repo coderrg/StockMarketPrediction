@@ -7,7 +7,7 @@ In this code, the producer and consumer are both locally hosted on the same comp
 
 First, you will need to install Kafka and the dependencies in requirements.txt.
 
-Next, start up the Kafka zookeeper by running the command zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties (you may need to change the path). Then, open up another terminal window, and start the Kafka broker with the command kafka-server-start /usr/local/etc/kafka/server.properties (once again, the path may vary).
+Next, open up the simulated_predictor.py file and make sure the paths for zookeeper and broker are correct for your system under the main function. 
 
 Now that our Kafka server is running, we can simulate the Producer sending real-time market data to the consumer by running the command python simulated_predictor.py. By default, the Producer sends data from the day before the day you run this code, starting at the market opening at 9:30 AM ET to its closing at 4:00 PM ET that day. Feel free to change the STOCK variable with other stock symbols. The default is Facebook (FB). 
 
