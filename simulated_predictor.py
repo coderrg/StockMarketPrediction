@@ -11,7 +11,7 @@ from fbprophet import Prophet
 
 import os
 import subprocess
-
+import multiprocessing
 
 BROKER_URL = "PLAINTEXT://localhost:9092"
 TOPIC_NAME = "simulated-realtime-stock-predictor"
@@ -97,7 +97,11 @@ async def produce_consume():
 
 def main():
     try:
-        asyncio.run(start_kafka_server())
+        k = multiprocessing.Process(target=start_kafka_server)
+        k.start()
+        time.sleep(60)
+        k.terminate()
+        k.join()
     except KeyboardInterrupt as e:
         print("Did not finish setting up Kafka server")
     
