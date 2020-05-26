@@ -10,27 +10,16 @@ from datetime import datetime, timedelta
 from fbprophet import Prophet
 
 import os
+import sys
 import subprocess
 import multiprocessing
 
 BROKER_URL = "PLAINTEXT://localhost:9092"
 TOPIC_NAME = "simulated-realtime-stock-predictor"
 STOCK = 'FB'
-api_key = 'B0N8Q38MJAVBSLOY'
+api_key = 'REDACTED'
 # Simulate stock market stream from yesterday
 DAY_TO_SIMULATE = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
-
-async def start_zookeeper():
-    os.system("zookeeper-server-start /usr/local/etc/kafka/zookeeper.properties")
-
-async def start_broker():
-    os.system("kafka-server-start /usr/local/etc/kafka/server.properties")
-
-async def start_kafka_server():
-    zookeeper = asyncio.create_task(start_zookeeper())
-    broker = asyncio.create_task(start_broker())
-    await zookeeper
-    await broker
 
 async def produce(topic_name):
     p = Producer({"bootstrap.servers": BROKER_URL})
@@ -85,7 +74,9 @@ async def consume(topic_name):
         elif message.error() is not None:
             print(f"error from consumer {message.error()}")
         else:
-            print(f"consumed message {message.key()}: {message.value()}")
+            #message_price = message.value()
+            #message_timestamp = message.timestamp()
+            print(f"Consumed message {message.key()}: {message.value()}")
         await asyncio.sleep(1)
 
 
@@ -96,27 +87,43 @@ async def produce_consume():
     await t2
 
 def main():
-    try:
-        k = multiprocessing.Process(target=start_kafka_server)
-        k.start()
-        time.sleep(60)
-        k.terminate()
-        k.join()
-    except KeyboardInterrupt as e:
-        print("Did not finish setting up Kafka server")
-    
-    client = AdminClient({"bootstrap.servers": BROKER_URL})
-    topic = NewTopic(TOPIC_NAME, num_partitions=1, replication_factor=1)
-    client.create_topics([topic])
-    print("All set up!")
+    # I know this is super jank, but I have to run main twice to properly shut down Kafka LOL
+    # I WILL figure out the right way to do this
+    for i in range (2):
+        try:
+            zookeeper_server = subprocess.Popen(["zookeeper-server-start","/usr/local/etc/kafka/zookeeper.properties"])
+            broker_server = subprocess.Popen(["kafka-server-start","/usr/local/etc/kafka/server.properties"])
+            # Give some time for server to start up
+            time.sleep(60)
+            print("Kafka server is running!")
+        except KeyboardInterrupt as e:
+            print("Did not finish setting up Kafka server")
+        
+        client = AdminClient({"bootstrap.servers": BROKER_URL})
+        topic = NewTopic(TOPIC_NAME, num_partitions=1, replication_factor=1)
+        client.create_topics([topic])
+        print("All set up!")
 
-    try:
-        asyncio.run(produce_consume())
-    except KeyboardInterrupt as e:
-        print("Did not finish producing and consuming available data")
-    finally:
-        client.delete_topics([topic])
+        try:
+            asyncio.run(produce_consume())
+        except KeyboardInterrupt as e:
+            print("Did not finish producing and consuming available data")
 
+        finally:
+            client.delete_topics([topic])
+            print("Topics deleted")
+            
+            os.system("zookeeper-server-stop /usr/local/etc/kafka/zookeeper.properties")
+            print("Zookeeper stopped")
+            os.system("kafka-server-stop /usr/local/etc/kafka/server.properties")
+            print("Broker stopped")
+            
+            time.sleep(5)
+            
+            zookeeper_server.kill()
+            print("Zookeeper terminated")
+            broker_server.kill()
+            print("Broker terminated")
 
 if __name__ == "__main__":
     main()
