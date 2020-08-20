@@ -17,7 +17,10 @@ import multiprocessing
 BROKER_URL = "PLAINTEXT://localhost:9092"
 TOPIC_NAME = "simulated-realtime-stock-predictor"
 STOCK = 'FB'
+
+# API for  
 api_key = 'REDACTED'
+
 # Simulate stock market stream from yesterday
 DAY_TO_SIMULATE = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
@@ -87,8 +90,6 @@ async def produce_consume():
     await t2
 
 def main():
-    # I know this is super jank, but I have to run main twice to properly shut down Kafka LOL
-    # I WILL figure out the right way to do this
     for i in range (2):
         try:
             zookeeper_server = subprocess.Popen(["zookeeper-server-start","/usr/local/etc/kafka/zookeeper.properties"])
