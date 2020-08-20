@@ -18,7 +18,7 @@ BROKER_URL = "PLAINTEXT://localhost:9092"
 TOPIC_NAME = "simulated-realtime-stock-predictor"
 STOCK = 'FB'
 
-# API for  
+# API for getting recent stock market data 
 api_key = 'REDACTED'
 
 # Simulate stock market stream from yesterday
