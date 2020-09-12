@@ -1,5 +1,5 @@
-# StockMarketPrediction
-Apache Kafka and Facebook Prophet to generate short-term stock market predictions.
+# Stock Market Prediction
+Apache Kafka and Facebook Prophet to simulate short-term stock market prediction.
 
 In this project, the Producer and Consumer are both locally hosted on the same device, and the Producer uses the Alpha Vantage API to simulate production of real-time stock market data.
 
