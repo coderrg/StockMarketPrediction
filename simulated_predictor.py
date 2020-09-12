@@ -18,8 +18,10 @@ BROKER_URL = "PLAINTEXT://localhost:9092"
 TOPIC_NAME = "simulated-realtime-stock-predictor"
 STOCK = 'FB'
 
-# API for getting recent stock market data 
-api_key = 'REDACTED'
+# load API key from secrets file
+import json
+with open ("secrets.json") as f:
+    api_key = json.load(f)["api_key"]
 
 # Simulate stock market stream from yesterday
 DAY_TO_SIMULATE = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
